@@ -3,62 +3,45 @@ package com.minseok.compose_basics
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.minseok.compose_basics.ui.theme.Compose_BasicsTheme
 
+/**
+ * Android 앱의 시작점이 되는 메인 액티비티
+ * ComponentActivity를 상속받아 Jetpack Compose UI를 설정
+ */
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // setContent: Compose UI를 설정하는 메서드
         setContent {
+            // 앱의 테마를 적용
             Compose_BasicsTheme {
+                // Surface: 배경색과 같은 기본적인 스타일링을 제공하는 컨테이너
                 Surface(
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize(), // 화면 전체를 채움
+                    color = MaterialTheme.colorScheme.background // Material3 테마의 배경색 사용
                 ) {
-                    CustomLayout(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp)
-                    ) {
-                        // 배치할 컴포저블들
-                        Text("첫 번째")
-                        Text("두 번째")
-                    }                }
-            }
-        }
-    }
-}
-@Composable
-fun CustomLayout(
-    modifier: Modifier = Modifier,
-    content: @Composable () -> Unit
-) {
-    Layout(
-        modifier = modifier,
-        content = content
-    ) { measurables, constraints ->
-        // 1. 자식들 측정
-        val placeables = measurables.map { measurable ->
-            measurable.measure(constraints)
-        }
-
-        // 2. 레이아웃 크기 결정
-        val width = placeables.maxOf { it.width }
-        val height = placeables.sumOf { it.height }
-
-        // 3. 자식들 배치
-        layout(width, height) {
-            var y = 0
-            placeables.forEach { placeable ->
-                placeable.placeRelative(x = 0, y = y)
-                y += placeable.height
+                    MainScreen()
+                }
             }
         }
     }
@@ -66,8 +49,254 @@ fun CustomLayout(
 
 
 
+//
+//@Preview
+//@Composable
+//fun MainScreen() {
+//    Row(
+//        Modifier
+//            .fillMaxWidth()
+//            .padding(16.dp)
+//    ) {
+//        // MIN 예시
+//        Column(
+//            Modifier
+//                .background(Color.LightGray)
+//                .width(IntrinsicSize.Min)
+//            //**IntrinsicSize.Min**은 자식들 중 가장 좁은 너비를 기준으로 부모의 너비를 결정합니다.
+//            //"Hi"가 가장 좁은 텍스트이므로, 이 텍스트의 최소 너비에 맞춰 Column의 너비가 설정됩니다.
+//        //부모의 너비는 자식 중 가장 좁은 요소에 맞춰지긴 하지만, 부모의 크기 설정은 다른 자식 컴포저블들의 크기와 관계 없이 독립적으로 작동하지 않습니다.
+//            //"Hi"라는 텍스트가 가장 좁은 요소라 하더라도, 다른 자식 컴포저블의 크기에 따라 부모가 조금 더 넓게 설정될 수 있습니다.
+//
+//        ) {
+//            Text("Min 컬럼")
+//            Text("Hi")
+//            Text("Hello World")
+//            Box(
+//                Modifier
+//                    .height(10.dp)
+//                    .width(50.dp)  // 더 작은 너비로 변경
+//                    .background(Color.Blue)
+//            )
+//        }
+//
+//        Spacer(Modifier.width(16.dp))
+//
+//        // MAX 예시
+//        Column(
+//            Modifier
+//                .background(Color.LightGray)
+//                .width(IntrinsicSize.Max)
+//        ) {
+//            Text("Max 컬럼")
+//            Text("Hi")
+//            Text("Hello World")
+//            Box(
+//                Modifier
+//                    .height(10.dp)
+//                    .width(50.dp)  // 더 작은 너비로 변경
+//                    .background(Color.Blue)
+//            )
+//        }
+//    }
+//}
+
+//
+///**
+// * 메인 화면의 UI를 구성하는 Composable 함수
+// * 텍스트 입력과 표시를 담당하는 UI 요소들을 포함
+// *
+// * 특징:
+// * - 상태 관리: mutableStateOf를 사용해 텍스트 상태 관리
+// * - 레이아웃: Column을 사용해 수직으로 요소들을 배치
+// * - IntrinsicSize: 내부 컨텐츠의 크기에 맞춰 자동으로 크기 조절
+// */
+//@Composable
+//fun MainScreen() {
+//    // remember: 리컴포지션 시에도 상태를 유지
+//    // mutableStateOf: 관찰 가능한 상태 생성
+//    var textState by remember { mutableStateOf("") }
+//
+//    // 텍스트 변경 이벤트 핸들러
+//    val onTextChange = { text: String ->
+//        textState = text
+//    }
+//
+//    // 최상위 Column - 전체 컨텐츠를 수직으로 배치
+//    Column(
+//        Modifier
+//            .padding(5.dp) // 전체 패딩 적용
+//    ) {
+//        // 내부 Column - 텍스트와 구분선을 포함
+//        Column(Modifier.width(IntrinsicSize.Min)) { // 내용물의 최소 너비에 맞춤
+//            // 입력된 텍스트를 표시
+//            Text(
+//                modifier = Modifier.padding(start = 4.dp),
+//                text = textState
+//            )
+//            // 파란색 구분선
+//            Box(
+//                Modifier
+//                    .height(10.dp)
+//                    .fillMaxWidth() // 부모의 너비를 채움
+//                    .background(Color.Blue)
+//            )
+//        }
+//        // 텍스트 입력 필드
+//        MyTextField(text = textState, onTextChange = onTextChange)
+//    }
+//}
+//
+///**
+// * 그니까 지금 텍스트 입력하면 상태가 바뀌고 그렇지? 부모->자식으로 전달해줬으니까
+// * 상태가 바뀌니까 리컴포지션 즉 재구성 일어나잖아
+// * 그럼 이제 다시 위에서부터 아래로 재구성 일어나고 ㅇㅇ 데이터 흐름은 아래에서 위인데,
+//  * 솔직히  데이터 흐름까지 파악할 필요는 없고, 상태가 바뀌었으니 위에서 아래로 UI렌더링 다시 되는거잖아.
+// *상태가 변경되면 UI가 위에서 아래로 다시 렌더링된다"는 흐름만 이해하면 충분합니다. Compose가 복잡한 내부 처리를 모두 해결해주자나!
+// *
+// *
+// *
+// *
+// *
+// *
+// *
+// *
+// *
+// *
+// * 재사용 가능한 텍스트 입력 필드 컴포넌트
+// *
+// * @param text 현재 입력된 텍스트
+// * @param onTextChange 텍스트 변경 시 호출될 콜백 함수
+// *
+// * 특징:
+// * - Material3 디자인의 TextField 사용
+// * - 상태 끌어올리기(State Hoisting) 패턴 적용 ->이 뭔 소린지는 모르겠고 걍 부모-자식 관계로 위에서 아래로 내려간다~ 라고 알면 됨 ㅇㅇ
+// */
+//@Composable
+//fun MyTextField(text: String, onTextChange: (String) -> Unit) {
+//    TextField(
+//        value = text, // 현재 텍스트 값
+//        onValueChange = onTextChange // 텍스트 변경 콜백
+//    )
+//}
+//
+///**
+// * 미리보기를 위한 Composable
+// * Android Studio의 미리보기 창에서 UI를 확인 가능
+// *
+// * @Preview 특징:
+// * - showBackground = true: 배경 표시
+// * - 실제 디바이스 없이도 UI 확인 가능
+// * - 빠른 UI 반복 작업 가능
+// */
+//@Preview(showBackground = true)
+//@Composable
+//fun DefaultPreview() {
+//    Compose_BasicsTheme {
+//        MainScreen()
+//    }
+//}
+//
+///* 주요 개념 설명:
+
+//1. Modifier
+//  - Compose의 UI 요소를 수정하는 데 사용되는 객체
+//  - 크기, 패딩, 배경 등 다양한 속성 설정 가능
+//  - 체이닝을 통해 여러 수정자를 연결 가능
+//
+//2. Column
+//  - 자식 요소들을 수직으로 배치하는 레이아웃
+//  - LinearLayout vertical과 유사한 역할
+//
+//3. IntrinsicSize
+//  - 컨텐츠의 본질적인 크기에 맞춰 크기를 조절
+//  - Min: 최소 필요 크기로 조절
+//
+//4. State Management
+//  - mutableStateOf: 관찰 가능한 상태 생성
+//  - remember: 리컴포지션 간 상태 보존
+//  - by 델리게이트를 통한 간편한 상태 접근
+//
+//5. Composable
+//  - @Composable 어노테이션이 붙은 함수
+//  - 선언적 UI를 구성하는 기본 단위
+//  - 재사용 가능한 UI 컴포넌트 생성 가능
+//*/
 
 
+
+
+
+
+
+
+//@Preview(showBackground = true, showSystemUi = true)
+//@Composable
+//fun PreviewConstraintLayout() { //안쓴다 ㄹㅇ 쓸모없네 여기선. 하나하나 설정해줘야하고. 써야할 이유가 없어보인다.
+//    ConstraintLayout(modifier = Modifier.fillMaxSize()) {
+//        val textRef = createRef()
+//
+//        Text(
+//            text = "Hello, ConstraintLayout!",
+//            modifier = Modifier.constrainAs(textRef) {
+//                start.linkTo(parent.start) // 가로 방향 제약
+//                top.linkTo(parent.top)    // 세로 방향 제약
+//                bottom.linkTo(parent.bottom)
+//            }
+//        )
+//    }
+//}
+//
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//@Composable
+//fun CustomLayout(
+//    modifier: Modifier = Modifier,
+//    content: @Composable () -> Unit
+//) {
+//    Layout(
+//        modifier = modifier,
+//        content = content
+//    ) { measurables, constraints ->
+//        // 1. 자식들 측정
+//        val placeables = measurables.map { measurable ->
+//            measurable.measure(constraints)
+//        }
+//
+//        // 2. 레이아웃 크기 결정
+//        val width = placeables.maxOf { it.width }
+//        val height = placeables.sumOf { it.height }
+//
+//        // 3. 자식들 배치
+//        layout(width, height) {
+//            var y = 0
+//            placeables.forEach { placeable ->
+//                placeable.placeRelative(x = 0, y = y)
+//                y += placeable.height
+//            }
+//        }
+//    }
+//}
+//
+//
+//
+//
+//
 
 
 
