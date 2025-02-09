@@ -3,51 +3,367 @@ package com.minseok.compose_basics
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.minseok.compose_basics.ui.theme.Compose_BasicsTheme
 
-/**
- * Android 앱의 시작점이 되는 메인 액티비티
- * ComponentActivity를 상속받아 Jetpack Compose UI를 설정
- */
 class MainActivity : ComponentActivity() {
+    private var itemArray: Array<String>? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // setContent: Compose UI를 설정하는 메서드
+        itemArray = resources.getStringArray(R.array.car_array)
+
         setContent {
-            // 앱의 테마를 적용
             Compose_BasicsTheme {
-                // Surface: 배경색과 같은 기본적인 스타일링을 제공하는 컨테이너
                 Surface(
-                    modifier = Modifier.fillMaxSize(), // 화면 전체를 채움
-                    color = MaterialTheme.colorScheme.background // Material3 테마의 배경색 사용
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
                 ) {
-                    MainScreen()
-                }
+                    AnimatedVisibilityAdvancedExample()                }
             }
+
+
+
+
+        }
+    }
+}
+
+@Composable
+fun AnimatedVisibilityAdvancedExample() {
+    // 애니메이션 효과를 위한 상태 변수 (true → 나타남, false → 사라짐)
+    var isVisible by remember { mutableStateOf(false) }
+
+    // 수직 정렬된 UI 배치를 위한 Column 사용
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+
+        // 버튼을 눌러서 isVisible 값을 변경 (true ↔ false)
+        Button(onClick = { isVisible = !isVisible }) {
+            // 버튼의 텍스트는 isVisible 값에 따라 변경됨
+            Text(text = if (isVisible) "Collapse" else "Expand")
+        }
+
+        // 버튼과 애니메이션 박스 사이 간격 추가
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // AnimatedVisibility: 조건(isVisible)에 따라 애니메이션 적용하여 박스를 표시/숨김
+        AnimatedVisibility(
+            visible = isVisible, // isVisible이 true면 나타남, false면 사라짐
+            enter = fadeIn(animationSpec = tween(500)) // 500ms 동안 서서히 나타남
+                    + expandVertically(expandFrom = Alignment.Top), // 위에서 아래로 확장됨
+            exit = fadeOut(animationSpec = tween(500)) // 500ms 동안 서서히 사라짐
+                    + shrinkVertically(shrinkTowards = Alignment.Bottom) // 아래 방향으로 작아짐
+        ) {
+                // 박스 내부에 표시될 텍스트
+                Text(
+                    text = "Animated Box!", // 고정된 텍스트
+                    color = Color.Blue,
+                    style = MaterialTheme.typography.headlineSmall // 텍스트 스타일 (크기, 굵기 등)
+                )
+
         }
     }
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//@Composable
+//fun MainScreen(itemArray: Array<String>) {
+//    val context = LocalContext.current
+//    val onListItemClick: (String) -> Unit = { text ->
+//        Toast.makeText(context, text, Toast.LENGTH_SHORT).show()
+//    }
+//
+//    LazyColumn {
+//        items(itemArray) { model ->
+//            MyListItem(item = model, onItemClick = onListItemClick)
+//        }
+//    }
+//}
+//
+//@Composable
+//fun MyListItem(item: String, onItemClick: (String) -> Unit) {
+//    Card(
+//        modifier = Modifier
+//            .padding(8.dp)
+//            .fillMaxWidth()
+//            .clickable { onItemClick(item) },
+//        shape = RoundedCornerShape(10.dp),
+//        elevation = CardDefaults.cardElevation(defaultElevation = 5.dp)
+//    ) {
+//        Row(
+//            modifier = Modifier.padding(8.dp),
+//            verticalAlignment = Alignment.CenterVertically
+//        ) {
+//            ImageLoader(item)
+//            Spacer(modifier = Modifier.width(8.dp))
+//            Text(
+//                text = item,
+//                style = MaterialTheme.typography.headlineSmall
+//            )
+//        }
+//    }
+//}
+//
+//@Composable
+//fun ImageLoader(item: String) {
+//    val url = "https://www.ebookfrenzy.com/book_examples/car_logos/" +
+//            item.substringBefore(" ").lowercase() + "_logo.png"
+//
+//    AsyncImage(
+//        model = url,
+//        contentDescription = "$item logo",
+//        modifier = Modifier.size(60.dp),
+//        contentScale = ContentScale.Fit
+//    )
+//}
+//
+//@Preview(showBackground = true)
+//@Composable
+//fun DefaultPreview() {
+//    val itemArray: Array<String> = arrayOf(
+//        "Cadillac Eldorado",
+//        "Ford Fairlane",
+//        "Plymouth Fury"
+//    )
+//    Compose_BasicsTheme {
+//        MainScreen(itemArray = itemArray)
+//    }
+//}
+
+//@Preview
+//@Composable
+//fun MyListScreen() {
+//    val items = listOf("사과", "바나나", "오렌지", "포도", "키위")
+//
+//    LazyColumn {
+//        itemsIndexed(items) { index, item ->
+//            Text(
+//                text = "번호: $index, 과일: $item",
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .padding(16.dp)
+//            )
+//        }
+//    }
+//}
+//
+////
+//@Preview
+//@Composable
+//fun ScrollExample() {
+//    // LazyListState를 remember로 기억
+//    val listState = rememberLazyListState()
+//    val coroutineScope = rememberCoroutineScope()
+//
+//    Column {
+//        // 스크롤 버튼들
+//        Row(
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .padding(16.dp),
+//            horizontalArrangement = Arrangement.SpaceEvenly
+//        ) {
+//            // 즉시 스크롤
+//            Button(onClick = {
+//                coroutineScope.launch {
+//                    listState.scrollToItem(50)  // 50번 아이템으로 즉시 이동
+//                }
+//            }) {
+//                Text("50번으로 즉시 이동")
+//            }
+//
+//            // 애니메이션 스크롤
+//            Button(onClick = {
+//                coroutineScope.launch {
+//                    listState.animateScrollToItem(50)  // 50번 아이템으로 애니메이션 이동
+//                }
+//            }) {
+//                Text("50번으로 애니메이션 이동")
+//            }
+//        }
+//
+//        // 리스트
+//        LazyColumn(
+//            state = listState  // LazyListState 연결
+//        ) {
+//            items(100) { index ->
+//                Text(
+//                    text = "아이템 $index",
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .padding(16.dp)
+//                )
+//            }
+//        }
+//    }
+//}
+
+
+
+
+//
+//fun myFunction1(
+//    name: String,
+//    action: (String) -> Unit,
+//    age: Int
+//) {
+//    action(name)  // 함수 구현부 추가
+//}
+//@Preview
+//@Composable
+//fun MyListScreen2() {
+//    // 여기서 함수 호출 가능
+//    myFunction1("철수") { name -> println(name) }
+//
+//    LazyColumn {
+//        items(1000) { index ->
+//            Text(
+//                text = "gdgd $index",
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .padding(16.dp)
+//            )
+//        }
+//    }
+//}
+//
+//
+//@Preview
+//@Composable
+//fun MyListScreen() {  // 컴포저블 함수 정의 필요
+//    LazyColumn {
+//        items(1000) { index ->
+//            Text(
+//                text = "gdgd $index",
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .padding(16.dp)
+//            )
+//        }
+//    }
+//}
+
+
+
+//
+////네, 맞습니다. 스크롤이 불가능한 일반 Column을 사용했기
+//// 때문에 화면 크기를 넘어가는 내용은 짤리게 됩니다. 스크롤이 가능하도록 만들기 위해서는 Column을 verticalScroll 수정자로 감싸주어야 합니다.
+//@Preview(showBackground = true)
+//@Composable
+//fun MyListScreen() {
+//    Column {
+//        repeat(121) {
+//            MyListItem()
+//        }
+//    }
+//}
+////verticalScroll 수정자와 rememberScrollState()를 추가하면 스크롤이 가능한 리스트가 됩니다. 이제 121개의 아이템이 모두 스크롤로 보일 수 있습니다.
+//
+//@Composable
+//fun MyListItem() {
+//    // 리스트 아이템의 내용을 정의
+//    Row(
+//        modifier = Modifier
+//            .fillMaxWidth()
+//            .padding(16.dp)
+//    ) {
+//        Text(text = "아이템 내용")
+//    }
+//}
+//
+////}
+//
+//@Composable
+//fun MyComposable() {
+//    val coroutineScope = rememberCoroutineScope()
+//
+//    Button(
+//        onClick = {
+//            coroutineScope.launch { perform() }
+//        }
+//    ) {
+//        Column { // ✅ 여러 UI 요소를 포함하기 위해 Column 사용
+//            Text("Click Me")
+//            Text("버튼 설명 텍스트") // ✅ 버튼 내부에 추가적인 설명을 포함 가능
+//        }
+//    }
+//}
+//
+//suspend fun perform() {
+//    // 비동기 작업 수행
+//}
+
+//@Composable
+//fun MyComposable() {
+//    LaunchedEffect(Unit) {
+//        println("현재 스레드: ${Thread.currentThread().name}")
+//        delay(3000)
+//        println("Composable이 살아있는 동안만 실행됨")
+//    }
+//}
+
+//@Composable
+//fun MyComposable() {
+//    val coroutineScope = rememberCoroutineScope()
+//
+//    Button(onClick = {
+//        println("버튼 클릭됨! 코루틴 실행 시작")  // 버튼 클릭 시 즉시 로그 출력
+//
+//        coroutineScope.launch {
+//            delay(3000)
+//            println("버튼 클릭 후 3초 후 실행됨")
+//        }
+//
+//        println("버튼 클릭 후 launch 이후 즉시 실행")  // 코루틴이 시작된 후 즉시 실행
+//    }) {
+//        Text("클릭 후 3초 대기")
+//    }
+//}
 
 //
 //@Preview

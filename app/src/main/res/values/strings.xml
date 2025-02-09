@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">Compose_Basics</string>
+
+    <!-- 문자열 배열로 선언 -->
+    <string-array name="car_array">
+        <item>Cadillac Eldorado</item>
+        <item>Ford Fairlane</item>
+        <item>Plymouth Fury</item>
+    </string-array>
+
 </resources>
