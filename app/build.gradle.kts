@@ -52,6 +52,10 @@ android {
 dependencies {
     implementation ("androidx.compose.material:material-icons-extended:1.5.0") // 최신 버전 확인 필요
     implementation("io.coil-kt:coil-compose:2.4.0")
+    implementation ("androidx.compose.runtime:runtime-livedata:1.6.0")
+    // ✅ Jetpack Compose에서 ViewModel 사용하려면 이거 추가!
+    implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
+    implementation("androidx.navigation:navigation-compose:2.8.7")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -62,6 +66,7 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.constraintlayout)
+    implementation(libs.androidx.navigation.compose)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

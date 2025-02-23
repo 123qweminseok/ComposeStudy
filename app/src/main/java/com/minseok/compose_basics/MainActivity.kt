@@ -3,89 +3,363 @@ package com.minseok.compose_basics
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Face
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 import com.minseok.compose_basics.ui.theme.Compose_BasicsTheme
 
-class MainActivity : ComponentActivity() {
-    private var itemArray: Array<String>? = null
+// 1. 목적지 경로 정의 (sealed class)
+sealed class NavRoutes(val route: String) {
+    object Home : NavRoutes("home")
+    object Contacts : NavRoutes("contacts")
+    object Favorites : NavRoutes("favorites")
+}
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        itemArray = resources.getStringArray(R.array.car_array)
+// 2. 하단 바 아이템 클래스 정의 (data class)
+data class NavBarItem(
+    val title: String,
+    val image: ImageVector,
+    val route: String
+)
 
-        setContent {
-            Compose_BasicsTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    AnimatedVisibilityAdvancedExample()                }
-            }
+// 3. 하단 바 아이템 리스트 정의 (object)
+object NavBarItems {
+    val BarItems = listOf(
+        NavBarItem("Home", Icons.Filled.Home, NavRoutes.Home.route),
+        NavBarItem("Contacts", Icons.Filled.Face, NavRoutes.Contacts.route),
+        NavBarItem("Favorites", Icons.Filled.Favorite, NavRoutes.Favorites.route)
+    )
+}
 
-
-
-
-        }
-    }
+// 4. 각 화면을 위한 Composable 함수
+@Composable
+fun HomeScreen() {
+    Text(text = "Home Screen")
 }
 
 @Composable
-fun AnimatedVisibilityAdvancedExample() {
-    // 애니메이션 효과를 위한 상태 변수 (true → 나타남, false → 사라짐)
-    var isVisible by remember { mutableStateOf(false) }
+fun ContactsScreen() {
+    Text(text = "Contacts Screen")
+}
 
-    // 수직 정렬된 UI 배치를 위한 Column 사용
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+@Composable
+fun FavoritesScreen() {
+    Text(text = "Favorites Screen")
+}
 
-        // 버튼을 눌러서 isVisible 값을 변경 (true ↔ false)
-        Button(onClick = { isVisible = !isVisible }) {
-            // 버튼의 텍스트는 isVisible 값에 따라 변경됨
-            Text(text = if (isVisible) "Collapse" else "Expand")
-        }
+// 5. 내비게이션 그래프 설정
+@Composable
+fun NavigationGraph(navController: NavHostController) {
+    NavHost(navController = navController, startDestination = NavRoutes.Home.route) {
+        composable(NavRoutes.Home.route) { HomeScreen() }
+        composable(NavRoutes.Contacts.route) { ContactsScreen() }
+        composable(NavRoutes.Favorites.route) { FavoritesScreen() }
+    }
+}
 
-        // 버튼과 애니메이션 박스 사이 간격 추가
-        Spacer(modifier = Modifier.height(16.dp))
+// 6. 하단 바 UI (Material3 NavigationBar 사용) ->순서대로 생김  내장 컴포저블인 NavigationBarItem을 호출하면.
+@Composable
+fun  BottomNavigationBar(navController: NavController) {
+    NavigationBar(containerColor = Color.White) {
+        // 현재 목적지 확인
+        val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
 
-        // AnimatedVisibility: 조건(isVisible)에 따라 애니메이션 적용하여 박스를 표시/숨김
-        AnimatedVisibility(
-            visible = isVisible, // isVisible이 true면 나타남, false면 사라짐
-            enter = fadeIn(animationSpec = tween(500)) // 500ms 동안 서서히 나타남
-                    + expandVertically(expandFrom = Alignment.Top), // 위에서 아래로 확장됨
-            exit = fadeOut(animationSpec = tween(500)) // 500ms 동안 서서히 사라짐
-                    + shrinkVertically(shrinkTowards = Alignment.Bottom) // 아래 방향으로 작아짐
-        ) {
-                // 박스 내부에 표시될 텍스트
-                Text(
-                    text = "Animated Box!", // 고정된 텍스트
-                    color = Color.Blue,
-                    style = MaterialTheme.typography.headlineSmall // 텍스트 스타일 (크기, 굵기 등)
-                )
-
+        NavBarItems.BarItems.forEach { item ->
+            NavigationBarItem(
+                icon = {
+                    Icon(
+                        imageVector = item.image,
+                        contentDescription = item.title
+                    )
+                },
+                label = {
+                    Text(text = item.title)
+                },
+                selected = currentRoute == item.route,
+                onClick = {
+                    // 클릭 시 해당 route로 이동
+                    navController.navigate(item.route)
+                }
+            )
         }
     }
 }
+
+// 7. 메인 화면에서 내비게이션 컨트롤러 포함
+@Composable
+fun MainScreen() {
+    val navController = rememberNavController()
+
+    Scaffold(
+        bottomBar = {
+            BottomNavigationBar(navController)
+        }
+    ) { innerPadding ->
+        // 실제 화면 전환 담당 내비게이션
+        NavigationGraph(navController = navController)
+    }
+}
+
+// 8. 앱의 시작점 (MainActivity)
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            Compose_BasicsTheme {
+                // 테마가 적용된 MainScreen 호출
+                MainScreen()
+            }
+        }
+    }
+}
+
+// (선택) 미리보기
+@Preview(showBackground = true)
+@Composable
+fun MainScreenPreview() {
+    Compose_BasicsTheme {
+        MainScreen()
+    }
+}
+
+//@Composable
+//fun ScreenSetup(viewModel: DemoViewModel = viewModel()) {
+//    // ViewModel에서 LiveData<Boolean>을 observeAsState()로 받아, Compose에서 상태로 활용
+//    val isFahrenheit by viewModel.isFahrenheit.observeAsState(initial = true)
+//    // ViewModel에서 LiveData<String>을 observeAsState()로 받아, Compose에서 상태로 활용
+//    val result by viewModel.result.observeAsState(initial = "")
+//
+//    // MainScreen에 필요한 데이터를 파라미터로 전달
+//    MainScreen(
+//        isFahrenheit = isFahrenheit,
+//        result = result,
+//        // Composable에서 ViewModel의 메서드를 직접 호출 가능
+//        convertTemp = { viewModel.convertTemp(it) },
+//        switchChange = { viewModel.switchChange() }
+//    )
+//}
+//
+//
+
+
+
+
+//
+//@Composable
+//fun MainScreen(
+//    // 화씨/섭씨 스위치 여부
+//    isFahrenheit: Boolean,
+//    // 변환 결과 값
+//    result: String,
+//    // 온도 변환을 수행하는 함수
+//    convertTemp: (String) -> Unit,
+//    // 화씨/섭씨 스위치를 변경하는 함수
+//    switchChange: () -> Unit
+//) {
+//    // 전체 화면을 세로(Column)로 배치
+//    Column(
+//        horizontalAlignment = Alignment.CenterHorizontally, // 수평 정렬 중앙
+//        modifier = Modifier
+//            .fillMaxSize()
+//            .padding(16.dp)
+//    ) {
+//        // 사용자가 입력한 온도 문자열을 기억하기 위한 State
+//        var textState by rememberSaveable { mutableStateOf("") }
+//
+//        // 제목 텍스트
+//        Text(
+//            text = "Temperature Converter",
+//            modifier = Modifier.padding(20.dp),
+//            style = MaterialTheme.typography.headlineMedium
+//        )
+//
+//        // 화씨/섭씨 스위치 및 입력 필드가 들어간 Row
+//        InputRow(
+//            isFahrenheit = isFahrenheit,
+//            textState = textState,
+//            switchChange = switchChange,
+//            onTextChange = { textState = it }
+//        )
+//
+//        // 변환 결과 표시
+//        Text(
+//            text = result,
+//            modifier = Modifier.padding(20.dp),
+//            style = MaterialTheme.typography.headlineLarge
+//        )
+//
+//        // 변환 버튼
+//        Button(
+//            onClick = { convertTemp(textState) }
+//        ) {
+//            Text("Convert Temperature")
+//        }
+//    }
+//}
+//
+//@Composable
+//fun InputRow(
+//    // 화씨/섭씨 상태
+//    isFahrenheit: Boolean,
+//    // 사용자 입력 값
+//    textState: String,
+//    // 스위치 변경 함수
+//    switchChange: () -> Unit,
+//    // 입력 값이 바뀔 때 호출되는 콜백
+//    onTextChange: (String) -> Unit
+//) {
+//    // 가로 배치 Row
+//    Row(
+//        verticalAlignment = Alignment.CenterVertically,       // 세로 방향 중앙 정렬
+//        horizontalArrangement = Arrangement.Center,           // 가로 방향 중앙 정렬
+//        modifier = Modifier.fillMaxWidth()
+//    ) {
+//        // 스위치 (true이면 화씨, false면 섭씨)
+//        Switch(
+//            checked = isFahrenheit,
+//            onCheckedChange = { switchChange() }
+//        )
+//
+//        // 온도 입력용 TextField
+//        OutlinedTextField(
+//            value = textState,
+//            onValueChange = onTextChange,
+//            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), // 숫자 키패드
+//            singleLine = true,
+//            label = { Text("Enter temperature") },
+//            modifier = Modifier.padding(10.dp),
+//            textStyle = LocalTextStyle.current.copy(
+//                fontWeight = FontWeight.Bold,
+//                fontSize = 30.sp
+//            )
+//        )
+//
+//        // 현재 스위치 상태에 따라 화씨 기호(℉) 또는 섭씨 기호(℃) 표시
+//        Text(
+//            text = if (isFahrenheit) "\u2109" else "\u2103",
+//            style = MaterialTheme.typography.headlineMedium
+//        )
+//    }
+//}
+//
+//// 미리보기(preview) 함수
+//@Preview(showBackground = true, showSystemUi = true)
+//@Composable
+//fun DefaultPreview() {
+//    Compose_BasicsTheme {
+//        // Preview에서도 동일하게 Composable 호출
+//        ScreenSetup()
+//    }
+//}
+
+//
+//@Composable
+//fun TweenAnimationDemo() {
+//    // 토글용 상태 (버튼 클릭 시 true/false 토글)
+//    var toggled by remember { mutableStateOf(false) }
+//
+//    /**
+//     * animateDpAsState:
+//     *  - Dp 타입의 값을 애니메이션으로 전환해주는 API
+//     *  - targetValue가 바뀔 때 지정된 AnimationSpec에 따라 값이 점진적으로 변함
+//     */
+//    val animatedSize by animateDpAsState(
+//        targetValue = if (toggled) 200.dp else 100.dp,
+//        animationSpec = tween(
+//            durationMillis = 1000, // 전체 애니메이션 진행 시간: 1초
+//            delayMillis = 300,     // 애니메이션 시작 전 대기 시간: 0.3초
+//            // Easing: 어떤 가감속 곡선을 적용할지 정함
+//            // Easing의 예시:
+//            // - LinearEasing(선형 진행)
+//            // - FastOutSlowInEasing (천천히 출발→빠르게 중간진행→다시 천천히)
+//            // - LinearOutSlowInEasing
+//            // - CubicBezierEasing(...) 등
+//            easing = androidx.compose.animation.core.FastOutSlowInEasing
+//        )
+//    )
+//
+//
+//
+//
+//
+//
+//    Column(
+//        modifier = Modifier.fillMaxSize(),
+//        horizontalAlignment = Alignment.CenterHorizontally,
+//        verticalArrangement = Arrangement.Center
+//    ) {
+//
+//        Box(
+//            modifier = Modifier
+//                .size(animatedSize)       // 애니메이션으로 변화되는 사이즈
+//                .background(Color.Red)
+//        )
+//
+//        Spacer(modifier = Modifier.height(20.dp))
+//
+//        Button(onClick = { toggled = !toggled }) {
+//            Text(text = if (toggled) "Shrink" else "Enlarge")
+//        }
+//    }
+//}
+//
+
+
+
+
+
+
+
+
+
+
+
+
+//@Composable
+//fun SimpleAnimatedVisibilityDemo() {
+//    // 어떤 조건에서 보이고/가려지는지에 대한 Boolean 값
+//    var isVisible by remember { mutableStateOf(true) }
+//
+//    Column(
+//        modifier = Modifier.fillMaxSize(),
+//        horizontalAlignment = Alignment.CenterHorizontally,
+//        verticalArrangement = Arrangement.Center
+//    ) {
+//        // 토글 버튼
+//        Button(onClick = { isVisible = !isVisible }) {
+//            Text(text = if (isVisible) "Hide" else "Show")
+//        }
+//
+//        // AnimatedVisibility를 사용하여 애니메이션 설정
+//        AnimatedVisibility(
+//            visible = isVisible,
+//            enter = fadeIn(),           // 진입 애니메이션: 점점 밝아짐
+//            exit = fadeOut()            // 이탈 애니메이션: 점점 사라짐
+//        ) {
+//            Box(
+//                modifier = Modifier
+//                    .size(100.dp)
+//                    .background(Color.Red)
+//            )
+//        }
+//    }
+//}
 
 
 
