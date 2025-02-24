@@ -56,7 +56,10 @@ dependencies {
     // ✅ Jetpack Compose에서 ViewModel 사용하려면 이거 추가!
     implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
     implementation("androidx.navigation:navigation-compose:2.8.7")
+    implementation ("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
 
+
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

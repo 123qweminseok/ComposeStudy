@@ -3,140 +3,174 @@ package com.minseok.compose_basics
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Face
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Scaffold
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.NavController
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
+import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.minseok.compose_basics.ui.theme.Compose_BasicsTheme
+import kotlinx.coroutines.flow.Flow
 
-// 1. 목적지 경로 정의 (sealed class)
-sealed class NavRoutes(val route: String) {
-    object Home : NavRoutes("home")
-    object Contacts : NavRoutes("contacts")
-    object Favorites : NavRoutes("favorites")
-}
-
-// 2. 하단 바 아이템 클래스 정의 (data class)
-data class NavBarItem(
-    val title: String,
-    val image: ImageVector,
-    val route: String
-)
-
-// 3. 하단 바 아이템 리스트 정의 (object)
-object NavBarItems {
-    val BarItems = listOf(
-        NavBarItem("Home", Icons.Filled.Home, NavRoutes.Home.route),
-        NavBarItem("Contacts", Icons.Filled.Face, NavRoutes.Contacts.route),
-        NavBarItem("Favorites", Icons.Filled.Favorite, NavRoutes.Favorites.route)
-    )
-}
-
-// 4. 각 화면을 위한 Composable 함수
-@Composable
-fun HomeScreen() {
-    Text(text = "Home Screen")
-}
-
-@Composable
-fun ContactsScreen() {
-    Text(text = "Contacts Screen")
-}
-
-@Composable
-fun FavoritesScreen() {
-    Text(text = "Favorites Screen")
-}
-
-// 5. 내비게이션 그래프 설정
-@Composable
-fun NavigationGraph(navController: NavHostController) {
-    NavHost(navController = navController, startDestination = NavRoutes.Home.route) {
-        composable(NavRoutes.Home.route) { HomeScreen() }
-        composable(NavRoutes.Contacts.route) { ContactsScreen() }
-        composable(NavRoutes.Favorites.route) { FavoritesScreen() }
-    }
-}
-
-// 6. 하단 바 UI (Material3 NavigationBar 사용) ->순서대로 생김  내장 컴포저블인 NavigationBarItem을 호출하면.
-@Composable
-fun  BottomNavigationBar(navController: NavController) {
-    NavigationBar(containerColor = Color.White) {
-        // 현재 목적지 확인
-        val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
-
-        NavBarItems.BarItems.forEach { item ->
-            NavigationBarItem(
-                icon = {
-                    Icon(
-                        imageVector = item.image,
-                        contentDescription = item.title
-                    )
-                },
-                label = {
-                    Text(text = item.title)
-                },
-                selected = currentRoute == item.route,
-                onClick = {
-                    // 클릭 시 해당 route로 이동
-                    navController.navigate(item.route)
-                }
-            )
-        }
-    }
-}
-
-// 7. 메인 화면에서 내비게이션 컨트롤러 포함
-@Composable
-fun MainScreen() {
-    val navController = rememberNavController()
-
-    Scaffold(
-        bottomBar = {
-            BottomNavigationBar(navController)
-        }
-    ) { innerPadding ->
-        // 실제 화면 전환 담당 내비게이션
-        NavigationGraph(navController = navController)
-    }
-}
+//// 1. 목적지 경로 정의 (sealed class)
+//sealed class NavRoutes(val route: String) {
+//    object Home : NavRoutes("home")
+//    object Contacts : NavRoutes("contacts")
+//    object Favorites : NavRoutes("favorites")
+//}
+//
+//// 2. 하단 바 아이템 클래스 정의 (data class)
+//data class NavBarItem(
+//    val title: String`,
+//    val image: ImageVector,
+//    val route: String
+//)
+//
+//// 3. 하단 바 아이템 리스트 정의 (object)
+//object NavBarItems {
+//    val BarItems = listOf(
+//        NavBarItem("Home", Icons.Filled.Home, NavRoutes.Home.route),
+//        NavBarItem("Contacts", Icons.Filled.Face, NavRoutes.Contacts.route),
+//        NavBarItem("Favorites", Icons.Filled.Favorite, NavRoutes.Favorites.route)
+//    )
+//}
+//
+//// 4. 각 화면을 위한 Composable 함수
+//@Composable
+//fun HomeScreen() {
+//    Text(text = "Home Screen")
+//}
+//
+//@Composable
+//fun ContactsScreen() {
+//    Text(text = "Contacts Screen")
+//}
+//
+//@Composable
+//fun FavoritesScreen() {
+//    Text(text = "Favorites Screen")
+//}
+//
+//// 5. 내비게이션 그래프 설정
+//@Composable
+//fun NavigationGraph(navController: NavHostController) {
+//    NavHost(navController = navController, startDestination = NavRoutes.Home.route) {
+//        composable(NavRoutes.Home.route) { HomeScreen() }
+//        composable(NavRoutes.Contacts.route) { ContactsScreen() }
+//        composable(NavRoutes.Favorites.route) { FavoritesScreen() }
+//    }
+//}
+//
+//// 6. 하단 바 UI (Material3 NavigationBar 사용) ->순서대로 생김  내장 컴포저블인 NavigationBarItem을 호출하면.
+//@Composable
+//fun  BottomNavigationBar(navController: NavController) {
+//    NavigationBar(containerColor = Color.White) {
+//        // 현재 목적지 확인
+//        val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+//
+//        NavBarItems.BarItems.forEach { item ->
+//            NavigationBarItem(
+//                icon = {
+//                    Icon(
+//                        imageVector = item.image,
+//                        contentDescription = item.title
+//                    )
+//                },
+//                label = {
+//                    Text(text = item.title)
+//                },
+//                selected = currentRoute == item.route,
+//                onClick = {
+//                    // 클릭 시 해당 route로 이동
+//                    navController.navigate(item.route)
+//                }
+//            )
+//        }
+//    }
+//}
+//
+//// 7. 메인 화면에서 내비게이션 컨트롤러 포함
+//@Composable
+//fun MainScreen() {
+//    val navController = rememberNavController()
+//
+//    Scaffold(
+//        bottomBar = {
+//            BottomNavigationBar(navController)
+//        }
+//    ) { innerPadding ->
+//        // 실제 화면 전환 담당 내비게이션
+//        NavigationGraph(navController = navController)
+//    }
+//}
 
 // 8. 앱의 시작점 (MainActivity)
-class MainActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            Compose_BasicsTheme {
-                // 테마가 적용된 MainScreen 호출
-                MainScreen()
+
+
+
+
+
+    class MainActivity : ComponentActivity() {
+        override fun onCreate(savedInstanceState: Bundle?) {
+            super.onCreate(savedInstanceState)
+            setContent {
+                Compose_BasicsTheme {
+                    // 테마가 적용된 MainScreen 호출
+                    val viewModel: DemoViewModel = viewModel()  // 시스템이 관리하는 ViewModel 인스턴스 가져오기->해당 액티비티 생명주기 딸므
+    //                val viewModel=DemoViewModel
+                    ScreenSetup(viewModel)  // ViewModel을 ScreenSetup으로 전달
+                }
             }
         }
     }
-}
 
-// (선택) 미리보기
-@Preview(showBackground = true)
-@Composable
-fun MainScreenPreview() {
-    Compose_BasicsTheme {
-        MainScreen()
+    @Composable
+    fun ScreenSetup(viewModel: DemoViewModel){
+        // ViewModel의 Flow 데이터를 MainScreen에 전달
+        MainScreen(viewModel.newFlow)
     }
-}
+
+    @Composable
+    fun MainScreen(flow: Flow<String>){
+        // Flow에서 데이터를 수집하여 count에 저장
+        val count by flow.collectAsState(initial = 0)  // Flow에서 emit된 값을 collect하여 상태로 변환
+
+        Column (
+            modifier = Modifier.fillMaxSize(),  // 화면 전체 크기
+            verticalArrangement = Arrangement.Center,  // 세로로 중앙 배치
+            horizontalAlignment = Alignment.CenterHorizontally  // 가로로 중앙 배치
+        ) {
+            // 화면에 Flow 값 출력 (count)
+            Text(text = "$count", style = TextStyle(fontSize = 40.sp))  // Flow에서 받은 값을 텍스트로 표시
+        }
+    }
+
+    @Preview(showBackground = true)
+    @Composable
+    fun DefaultPreView() {
+        Compose_BasicsTheme {
+            // Preview에서 ViewModel을 생성하고 화면 표시
+            val viewModel: DemoViewModel = viewModel()  // 시스템이 관리하는 ViewModel 인스턴스 가져오기
+            ScreenSetup(viewModel)  // ViewModel을 ScreenSetup으로 전달
+        }
+    }
+
+
+//// (선택) 미리보기
+//@Preview(showBackground = true)
+//@Composable
+//fun MainScreenPreview() {
+//    Compose_BasicsTheme {
+//        MainScreen()
+//    }
+//}
 
 //@Composable
 //fun ScreenSetup(viewModel: DemoViewModel = viewModel()) {
