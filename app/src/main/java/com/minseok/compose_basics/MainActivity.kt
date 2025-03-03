@@ -3,21 +3,25 @@ package com.minseok.compose_basics
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.ui.unit.dp
 import com.minseok.compose_basics.ui.theme.Compose_BasicsTheme
-import kotlinx.coroutines.flow.Flow
 
 //// 1. 목적지 경로 정의 (sealed class)
 //sealed class NavRoutes(val route: String) {
@@ -123,44 +127,94 @@ import kotlinx.coroutines.flow.Flow
             setContent {
                 Compose_BasicsTheme {
                     // 테마가 적용된 MainScreen 호출
-                    val viewModel: DemoViewModel = viewModel()  // 시스템이 관리하는 ViewModel 인스턴스 가져오기->해당 액티비티 생명주기 딸므
     //                val viewModel=DemoViewModel
-                    ScreenSetup(viewModel)  // ViewModel을 ScreenSetup으로 전달
-                }
+                    CheckboxToggleDemo()                }
             }
         }
     }
 
-    @Composable
-    fun ScreenSetup(viewModel: DemoViewModel){
-        // ViewModel의 Flow 데이터를 MainScreen에 전달
-        MainScreen(viewModel.newFlow)
-    }
 
-    @Composable
-    fun MainScreen(flow: Flow<String>){
-        // Flow에서 데이터를 수집하여 count에 저장
-        val count by flow.collectAsState(initial = 0)  // Flow에서 emit된 값을 collect하여 상태로 변환
 
-        Column (
-            modifier = Modifier.fillMaxSize(),  // 화면 전체 크기
-            verticalArrangement = Arrangement.Center,  // 세로로 중앙 배치
-            horizontalAlignment = Alignment.CenterHorizontally  // 가로로 중앙 배치
+
+@Composable
+fun CheckboxToggleDemo() {
+    var isChecked by remember { mutableStateOf(false) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        // 체크박스 상태를 보여주는 텍스트
+        Text("현재 체크박스 상태: ${if (isChecked) "체크됨" else "체크 안됨"}")
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // 체크박스
+        Row(
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            // 화면에 Flow 값 출력 (count)
-            Text(text = "$count", style = TextStyle(fontSize = 40.sp))  // Flow에서 받은 값을 텍스트로 표시
-        }
-    }
+            Checkbox(
+                checked = isChecked,
+                onCheckedChange = { newValue ->
+                    // 체크박스가 클릭될 때 호출됨
+                    println("체크박스 상태 변경: $isChecked -> $newValue")
+                    isChecked = newValue  // 상태 업데이트
+                }
+            )
 
-    @Preview(showBackground = true)
-    @Composable
-    fun DefaultPreView() {
-        Compose_BasicsTheme {
-            // Preview에서 ViewModel을 생성하고 화면 표시
-            val viewModel: DemoViewModel = viewModel()  // 시스템이 관리하는 ViewModel 인스턴스 가져오기
-            ScreenSetup(viewModel)  // ViewModel을 ScreenSetup으로 전달
+            Spacer(modifier = Modifier.width(8.dp))
+
+            Text("옵션 선택")
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // 수동으로 상태를 토글하는 버튼
+        Button(
+            onClick = {
+                // 버튼 클릭 시 상태를 수동으로 반전
+                isChecked = !isChecked
+                println("버튼으로 상태 토글: $isChecked")
+            }
+        ) {
+            Text("수동으로 상태 토글")
         }
     }
+}
+
+
+//    @Composable
+//    fun ScreenSetup(viewModel: DemoViewModel){
+//        // ViewModel의 Flow 데이터를 MainScreen에 전달
+//        MainScreen(viewModel.newFlow)
+//    }
+//
+//    @Composable
+//    fun MainScreen(flow: Flow<String>){
+//        // Flow에서 데이터를 수집하여 count에 저장
+//        val count by flow.collectAsState(initial = 0)  // Flow에서 emit된 값을 collect하여 상태로 변환
+//
+//        Column (
+//            modifier = Modifier.fillMaxSize(),  // 화면 전체 크기
+//            verticalArrangement = Arrangement.Center,  // 세로로 중앙 배치
+//            horizontalAlignment = Alignment.CenterHorizontally  // 가로로 중앙 배치
+//        ) {
+//            // 화면에 Flow 값 출력 (count)
+//            Text(text = "$count", style = TextStyle(fontSize = 40.sp))  // Flow에서 받은 값을 텍스트로 표시
+//        }
+//    }
+//
+//    @Preview(showBackground = true)
+//    @Composable
+//    fun DefaultPreView() {
+//        Compose_BasicsTheme {
+//            // Preview에서 ViewModel을 생성하고 화면 표시
+//            val viewModel: DemoViewModel = viewModel()  // 시스템이 관리하는 ViewModel 인스턴스 가져오기
+//            ScreenSetup(viewModel)  // ViewModel을 ScreenSetup으로 전달
+//        }
+//    }
 
 
 //// (선택) 미리보기
